@@ -75,7 +75,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         int permissionCheck2 = ContextCompat.checkSelfPermission(CameraActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int permissionCheck3 = ContextCompat.checkSelfPermission(CameraActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
         if (permissionCheck1 == PackageManager.PERMISSION_DENIED || permissionCheck2 == PackageManager.PERMISSION_DENIED
-                 || permissionCheck3 == PackageManager.PERMISSION_DENIED)
+                || permissionCheck3 == PackageManager.PERMISSION_DENIED)
             RequestRuntimePermission();
 
         final at.markushi.ui.CircleButton btn = (at.markushi.ui.CircleButton) findViewById(R.id.button2);
@@ -83,10 +83,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!play){
+                if (!play) {
                     startTakePic();
                     btn.setImageResource(R.mipmap.ic_launcher_pause);
-                }else{
+                } else {
                     refreshCamera();
                     timer.cancel();
                     btn.setImageResource(R.mipmap.ic_launcher_camera_black);
@@ -128,10 +128,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                            camera.takePicture(null, null, mPicture);
+                camera.takePicture(null, null, mPicture);
             }
 
-        }, 0, 2500);
+        }, 0, 2800);
     }
 
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
@@ -142,7 +142,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             Bitmap decodedBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             bitmapCrop = bitmap;
-            System.out.println("Screen : "+getScreenWidth() + " " + getScreenHeight());
+            System.out.println("Screen : " + getScreenWidth() + " " + getScreenHeight());
             System.out.println("Bitmap : " + bitmapCrop.getWidth() + " " + bitmapCrop.getHeight());
             prepareTessData();
             startOCR();
@@ -167,7 +167,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         paint.setStrokeWidth(5);
         RectLeft = widthPic - (widthPic - 100);
         RectTop = heightPic - (heightPic - 300);
-        RectRight = widthPic -100;
+        RectRight = widthPic - 100;
         RectBottom = RectTop + 200;
         Rect rec = new Rect((int) RectLeft, (int) RectTop, (int) RectRight, (int) RectBottom);
         canvas.drawRect(rec, paint);
@@ -197,6 +197,21 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         }
     }
 
+    @Override
+
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        // Toast.makeText(this, "surfaceChanged", Toast.LENGTH_SHORT).show();
+
+        refreshCamera(); //call method for refress camera
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        camera.stopPreview();
+        camera.release();
+        camera = null;
+    }
+
     void setParam() {
         Camera.Parameters param;
         param = camera.getParameters();
@@ -208,21 +223,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         param.setPictureSize(widthPic, heightPic);
         param.setPreviewSize(widthPic, heightPic);
         camera.setParameters(param);
-    }
-
-    @Override
-
-    protected void onDestroy() {
-        //  Toast.makeText(this, "onDestroy", Toast.LENGTH_SHORT).show();
-        super.onDestroy();
-    }
-
-    @Override
-
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        // Toast.makeText(this, "surfaceChanged", Toast.LENGTH_SHORT).show();
-
-        refreshCamera(); //call method for refress camera
     }
 
     public void refreshCamera() {
@@ -248,20 +248,13 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         Camera.Parameters param = camera.getParameters();
         for (Camera.Size size : param.getSupportedPictureSizes()) {
 
-            if (size.width <= deviceWidth  && size.height <= deviceHeight) {
+            if (size.width <= deviceWidth && size.height <= deviceHeight) {
                 widthPic = size.width;
                 heightPic = size.height;
             }
         }
     }
 
-    @Override
-
-    public void surfaceDestroyed(SurfaceHolder holder) {
-
-        camera.release(); //for release a camera
-
-    }
 
     private void prepareTessData() {
         try {
@@ -300,8 +293,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
             options.inSampleSize = 6;
-            bitmapCrop = Bitmap.createBitmap(bitmapCrop, RectLeft, RectTop, RectRight - RectLeft-100, RectBottom - RectTop);
-            System.out.println("R-L " + (RectRight - RectLeft ));
+            bitmapCrop = Bitmap.createBitmap(bitmapCrop, RectLeft, RectTop, RectRight - RectLeft - 100, RectBottom - RectTop);
+            System.out.println("R-L " + (RectRight - RectLeft));
             String result = getText();
 
             System.out.println(result);
