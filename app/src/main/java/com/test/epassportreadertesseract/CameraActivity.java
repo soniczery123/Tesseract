@@ -1,8 +1,6 @@
 package com.test.epassportreadertesseract;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,20 +10,20 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.Camera;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
@@ -34,6 +32,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -48,38 +48,79 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private TessBaseAPI tessBaseAPI;
     private Bitmap bitmapCrop;
     private int widthPic, heightPic;
-    final int RequestPermissionCode = 1;
     private int RectLeft, RectTop, RectRight, RectBottom;
     int deviceHeight, deviceWidth;
-    Timer timer;
+    Timer timer = new Timer();
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            float x = event.getX();
+            float y = event.getY();
+            System.out.println("TOUCH " + x+" "+y);
+            Rect rect = calculateFocusArea(event.getX(), event.getY());
+            doTouchFocus(rect);
+
+        }
+        return false;
+    }
+    private Rect calculateFocusArea(float x, float y) {
+        int FOCUS_AREA_SIZE = 300;
+        int left = clamp(Float.valueOf((x / widthPic * 2000 - 1000)).intValue(), FOCUS_AREA_SIZE);
+        int top = clamp(Float.valueOf((y / heightPic * 2000 - 1000)).intValue(), FOCUS_AREA_SIZE);
+        return new Rect(left, top, left + FOCUS_AREA_SIZE, top + FOCUS_AREA_SIZE);
+    }
+
+    private int clamp(int touchCoordinateInCameraReper, int focusAreaSize) {
+        int result;
+        if (Math.abs(touchCoordinateInCameraReper)+focusAreaSize/2>1000){
+            if (touchCoordinateInCameraReper>0){
+                result = 1000 - focusAreaSize/2;
+            } else {
+                result = -1000 + focusAreaSize/2;
+            }
+        } else{
+            result = touchCoordinateInCameraReper - focusAreaSize/2;
+        }
+        return result;
+    }
+    private void doTouchFocus(final Rect tfocusRect) {
+        try {
+            final List<Camera.Area> focusList = new ArrayList<Camera.Area>();
+            Camera.Area focusArea = new Camera.Area(tfocusRect, 1000);
+            focusList.add(focusArea);
+
+            Camera.Parameters para = camera.getParameters();
+            para.setFocusAreas(focusList);
+            para.setMeteringAreas(focusList);
+            camera.setParameters(para);
+            camera.autoFocus(myAutoFocusCallback);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+    Camera.AutoFocusCallback myAutoFocusCallback = new Camera.AutoFocusCallback() {
+
+        @Override
+        public void onAutoFocus(boolean arg0, Camera arg1) {
+           // if (arg0) {
+                //camera.takePicture(null,null,mPicture);
+                camera.cancelAutoFocus();
+          //  }
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT < 16) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        } else {
-            View decorView = getWindow().getDecorView();
-// Hide the status bar.
-            int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-            decorView.setSystemUiVisibility(uiOptions);
-// Remember that you should never show the action bar if the
-// status bar is hidden, so hide that too if necessary.
-            getSupportActionBar().hide();
-        }
-
         setContentView(R.layout.activity_camera);
+        Window window = this.getWindow();
 
-        int permissionCheck1 = ContextCompat.checkSelfPermission(CameraActivity.this, Manifest.permission.CAMERA);
-        int permissionCheck2 = ContextCompat.checkSelfPermission(CameraActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int permissionCheck3 = ContextCompat.checkSelfPermission(CameraActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (permissionCheck1 == PackageManager.PERMISSION_DENIED || permissionCheck2 == PackageManager.PERMISSION_DENIED
-                || permissionCheck3 == PackageManager.PERMISSION_DENIED)
-            RequestRuntimePermission();
-
+// finally change the color
+        window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorBlack));
+        getSupportActionBar().hide();
         final at.markushi.ui.CircleButton btn = (at.markushi.ui.CircleButton) findViewById(R.id.button2);
-
+        System.out.println("SCREEN : " + getScreenWidth() + " " + getScreenHeight());
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -92,7 +133,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     btn.setImageResource(R.mipmap.ic_launcher_camera_black);
                 }
                 play = !play;
-                //camera.takePicture(null, null, mPicture);
+                System.out.println(cameraView.requestFocus());
+
+               // camera.takePicture(null, null, mPicture);
             }
         });
 
@@ -101,15 +144,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         holder = cameraView.getHolder();
         holder.addCallback(this);
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        // Create second surface with another holder (holderTransparent)
-        transparentView = (SurfaceView) findViewById(R.id.TransparentView);
-        holder = cameraView.getHolder();
-        holder.addCallback((SurfaceHolder.Callback) this);
-        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         cameraView.setSecure(true);
-
         // Create second surface with another holder (holderTransparent)
-
         transparentView = (SurfaceView) findViewById(R.id.TransparentView);
         holderTransparent = transparentView.getHolder();
         holderTransparent.addCallback((SurfaceHolder.Callback) this);
@@ -131,11 +167,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 camera.takePicture(null, null, mPicture);
             }
 
-        }, 0, 2800);
+        }, 0, 2900);
     }
 
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
-
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
 
@@ -157,31 +192,54 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
-    private void Draw()
-
-    {
+    private void Draw(){
         Canvas canvas = holderTransparent.lockCanvas(null);
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.GREEN);
         paint.setStrokeWidth(5);
         RectLeft = widthPic - (widthPic - 100);
-        RectTop = heightPic - (heightPic - 300);
+        RectTop = (int)(heightPic*25/100);
         RectRight = widthPic - 100;
-        RectBottom = RectTop + 200;
-        Rect rec = new Rect((int) RectLeft, (int) RectTop, (int) RectRight, (int) RectBottom);
+        RectBottom = RectTop + (int)(heightPic*20/100);
+
+        //Border
+        Rect rec = new Rect((int) RectLeft, (int) RectTop, (int) deviceWidth-100, (int) RectBottom);
+        canvas.drawRect(rec, paint);
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.parseColor("#55000000"));
+        //Left
+        rec = new Rect(0, 0, 100, heightPic+100);
+        canvas.drawRect(rec, paint);
+        //Right
+        rec = new Rect(deviceWidth-100, 0, deviceWidth, heightPic+100);
+        canvas.drawRect(rec, paint);
+        //Top
+        rec = new Rect(RectLeft, 0, deviceWidth-100, RectTop);
+        canvas.drawRect(rec, paint);
+        //Bottom
+        rec = new Rect(RectLeft, RectBottom, deviceWidth-100, heightPic+100);
         canvas.drawRect(rec, paint);
         holderTransparent.unlockCanvasAndPost(canvas);
     }
-
+    private void releaseCameraAndPreview() {
+        if (camera != null) {
+            camera.release();
+            camera = null;
+        }
+    }
     @Override
 
     public void surfaceCreated(SurfaceHolder holder) {
+        releaseCameraAndPreview();
         camera = Camera.open(); //open a camera
+
         try {
             //  Toast.makeText(this, "surfaceCreated", Toast.LENGTH_SHORT).show();
             synchronized (holder) {
                 setPicSize();
+
                 Draw();
             }   //call a draw method
         } catch (Exception e) {
@@ -190,8 +248,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         }
         setParam();
         try {
+
+
             camera.setPreviewDisplay(holder);
             camera.startPreview();
+
         } catch (Exception e) {
             return;
         }
@@ -207,15 +268,14 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        camera.stopPreview();
         camera.release();
-        camera = null;
     }
 
     void setParam() {
         Camera.Parameters param;
         param = camera.getParameters();
         param.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        param.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO);
         Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
         if (display.getRotation() == Surface.ROTATION_0) {
             camera.setDisplayOrientation(90);
@@ -245,14 +305,26 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     }
 
     public void setPicSize() {
+        int maxWidth= -1,maxHeight=-1;
         Camera.Parameters param = camera.getParameters();
         for (Camera.Size size : param.getSupportedPictureSizes()) {
 
-            if (size.width <= deviceWidth && size.height <= deviceHeight) {
-                widthPic = size.width;
-                heightPic = size.height;
+            System.out.println("Picsize "+ size.width + " " + size.height);
+            if (size.width <= deviceWidth && size.height <= deviceHeight
+                    && size.width > maxWidth && size.height > maxHeight) {
+                maxWidth = size.width;
+                maxHeight = size.height;
             }
         }
+        if(maxWidth < 1920 && maxHeight < 1280){
+            widthPic = 1280;
+            heightPic = 720;
+        }else{
+            widthPic = maxWidth;
+            heightPic = maxHeight;
+        }
+
+
     }
 
 
@@ -293,8 +365,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
             options.inSampleSize = 6;
-            bitmapCrop = Bitmap.createBitmap(bitmapCrop, RectLeft, RectTop, RectRight - RectLeft - 100, RectBottom - RectTop);
-            System.out.println("R-L " + (RectRight - RectLeft));
+            bitmapCrop = Bitmap.createBitmap(bitmapCrop, RectLeft, RectTop, RectRight - RectLeft , RectBottom - RectTop);
+            System.out.println("R-L " + (RectTop - RectBottom));
+            ImageView img = (ImageView)findViewById(R.id.img);
+            img.setImageBitmap(bitmapCrop);
             String result = getText();
 
             System.out.println(result);
@@ -338,30 +412,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         }
         tessBaseAPI.end();
         return result.replace(" ", "");
-    }
-
-    private void RequestRuntimePermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA))
-            Toast.makeText(this, "CAMERA permission allows us to access CAMERA app", Toast.LENGTH_SHORT).show();
-        else {
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, RequestPermissionCode);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case RequestPermissionCode: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(this, "Permission Canceled", Toast.LENGTH_SHORT).show();
-            }
-            break;
-        }
     }
 
     public Bitmap resize(Bitmap img, int newWidth, int newHeight) {

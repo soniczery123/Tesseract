@@ -1,11 +1,16 @@
 package com.test.epassportreadertesseract;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,11 +26,18 @@ public class MainActivity extends AppCompatActivity {
 
     EditText ID, Firstname, Surname, Sex, DOB, PassType, ExpDate, Nation, CitizenNo;
     Button buttonConfirm;
-
+    final int RequestPermissionCode = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        int permissionCheck1 = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        int permissionCheck2 = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int permissionCheck3 = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permissionCheck1 == PackageManager.PERMISSION_DENIED || permissionCheck2 == PackageManager.PERMISSION_DENIED
+                || permissionCheck3 == PackageManager.PERMISSION_DENIED)
+            RequestRuntimePermission();
 
         buttonConfirm = (Button) findViewById(R.id.buttonConfirm);
 
@@ -285,5 +297,28 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+    private void RequestRuntimePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA))
+            Toast.makeText(this, "CAMERA permission allows us to access CAMERA app", Toast.LENGTH_SHORT).show();
+        else {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, RequestPermissionCode);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case RequestPermissionCode: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(this, "Permission Canceled", Toast.LENGTH_SHORT).show();
+            }
+            break;
+        }
     }
 }
