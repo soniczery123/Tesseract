@@ -11,6 +11,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,9 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -51,7 +55,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private int RectLeft, RectTop, RectRight, RectBottom;
     int deviceHeight, deviceWidth;
     Timer timer = new Timer();
-
+    String result = "";
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -157,6 +161,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         deviceWidth = getScreenWidth();
         deviceHeight = getScreenHeight();
 
+
     }
 
     private void startTakePic() {
@@ -199,7 +204,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         paint.setColor(Color.GREEN);
         paint.setStrokeWidth(5);
         RectLeft = widthPic - (widthPic - 100);
-        RectTop = (int)(heightPic*25/100);
+        RectTop = (int)(heightPic*36/100);
         RectRight = widthPic - 100;
         RectBottom = RectTop + (int)(heightPic*20/100);
 
@@ -208,7 +213,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         canvas.drawRect(rec, paint);
 
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.parseColor("#55000000"));
+        paint.setColor(Color.parseColor("#66000000"));
         //Left
         rec = new Rect(0, 0, 100, heightPic+100);
         canvas.drawRect(rec, paint);
@@ -249,7 +254,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         setParam();
         try {
 
-
             camera.setPreviewDisplay(holder);
             camera.startPreview();
 
@@ -269,6 +273,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         camera.release();
+
     }
 
     void setParam() {
@@ -365,22 +370,41 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
             options.inSampleSize = 6;
-            bitmapCrop = Bitmap.createBitmap(bitmapCrop, RectLeft, RectTop, RectRight - RectLeft , RectBottom - RectTop);
+            bitmapCrop = Bitmap.createBitmap(bitmapCrop, RectLeft, RectTop+30, RectRight - RectLeft , RectBottom - RectTop);
             System.out.println("R-L " + (RectTop - RectBottom));
-            ImageView img = (ImageView)findViewById(R.id.img);
-            img.setImageBitmap(bitmapCrop);
-            String result = getText();
+
+            result = getText();
+
 
             System.out.println(result);
             if (result.length() != 89) {
                 Toast.makeText(this, "Please try again ", Toast.LENGTH_SHORT).show();
 
             } else {
+                ImageView img = (ImageView)findViewById(R.id.img);
+                FrameLayout frameLayout = (FrameLayout)findViewById(R.id.frameLayout);
+                img.setImageBitmap(bitmapCrop);
+                Animation resize = AnimationUtils.loadAnimation(CameraActivity.this, R.anim.resize);
+                Animation blink = AnimationUtils.loadAnimation(CameraActivity.this, R.anim.blink);
+
+
+                img.startAnimation(resize);
+                frameLayout.startAnimation(blink);
                 timer.cancel();
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.putExtra("result", result);
-                startActivity(intent);
-                finish();
+                new CountDownTimer(500, 500) {
+                    public void onTick(long millisUntilFinished) {
+                        // Tick
+                    }
+
+                    public void onFinish() {
+                        // Finish
+                        Intent intent = new Intent(CameraActivity.this, MainActivity.class);
+                        intent.putExtra("result", result);
+                        startActivity(intent);
+                        finish();
+                    }
+                }.start();
+
             }
 
         } catch (Exception e) {
