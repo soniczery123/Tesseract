@@ -21,7 +21,6 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -44,13 +43,13 @@ import java.util.TimerTask;
 public class CameraActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private SurfaceView cameraView, transparentView;
     private SurfaceHolder holder, holderTransparent;
-    boolean play = false;
     private Camera camera;
     public static final String TESS_DATA = "/tessdata";
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() + "/Tess";
     private TessBaseAPI tessBaseAPI;
     private Bitmap bitmapCrop;
+    final int RequestCameraPermissionID = 1001;
     private int widthPic, heightPic;
     private int RectLeft, RectTop, RectRight, RectBottom;
     int deviceHeight, deviceWidth;
@@ -104,6 +103,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         }
 
     }
+
     Camera.AutoFocusCallback myAutoFocusCallback = new Camera.AutoFocusCallback() {
 
         @Override
@@ -123,25 +123,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 // finally change the color
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorBlack));
         getSupportActionBar().hide();
-        final at.markushi.ui.CircleButton btn = (at.markushi.ui.CircleButton) findViewById(R.id.button2);
-        System.out.println("SCREEN : " + getScreenWidth() + " " + getScreenHeight());
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!play) {
-                    startTakePic();
-                    btn.setImageResource(R.mipmap.ic_launcher_pause);
-                } else {
-                    refreshCamera();
-                    timer.cancel();
-                    btn.setImageResource(R.mipmap.ic_launcher_camera_black);
-                }
-                play = !play;
-                System.out.println(cameraView.requestFocus());
 
-               // camera.takePicture(null, null, mPicture);
-            }
-        });
+        System.out.println("SCREEN : " + getScreenWidth() + " " + getScreenHeight());
+
 
         // Create first surface with his holder(holder)
         cameraView = (SurfaceView) findViewById(R.id.CameraView);
@@ -149,8 +133,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         holder.addCallback(this);
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         cameraView.setSecure(true);
+
         // Create second surface with another holder (holderTransparent)
+
         transparentView = (SurfaceView) findViewById(R.id.TransparentView);
+
         holderTransparent = transparentView.getHolder();
         holderTransparent.addCallback((SurfaceHolder.Callback) this);
         holderTransparent.setFormat(PixelFormat.TRANSLUCENT);
@@ -226,6 +213,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         //Bottom
         rec = new Rect(RectLeft, RectBottom, deviceWidth-100, heightPic+100);
         canvas.drawRect(rec, paint);
+
+        paint.setColor(Color.GREEN);
+        paint.setTextSize(50);
+        canvas.drawText("Put the MRZ in here",RectLeft,RectTop-paint.getTextSize()/2,paint);
         holderTransparent.unlockCanvasAndPost(canvas);
     }
     private void releaseCameraAndPreview() {
@@ -257,6 +248,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             camera.setPreviewDisplay(holder);
             camera.startPreview();
 
+
         } catch (Exception e) {
             return;
         }
@@ -268,6 +260,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         // Toast.makeText(this, "surfaceChanged", Toast.LENGTH_SHORT).show();
 
         refreshCamera(); //call method for refress camera
+
+         if(holder == cameraView.getHolder())  {
+             startTakePic();
+         }
+
     }
 
     @Override
@@ -314,7 +311,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         Camera.Parameters param = camera.getParameters();
         for (Camera.Size size : param.getSupportedPictureSizes()) {
 
-            System.out.println("Picsize "+ size.width + " " + size.height);
             if (size.width <= deviceWidth && size.height <= deviceHeight
                     && size.width > maxWidth && size.height > maxHeight) {
                 maxWidth = size.width;
@@ -371,13 +367,12 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             options.inJustDecodeBounds = false;
             options.inSampleSize = 6;
             bitmapCrop = Bitmap.createBitmap(bitmapCrop, RectLeft, RectTop+30, RectRight - RectLeft , RectBottom - RectTop);
-            System.out.println("R-L " + (RectTop - RectBottom));
 
             result = getText();
 
-
             System.out.println(result);
-            if (result.length() != 89) {
+
+             if (result.length() != 89) {
                 Toast.makeText(this, "Please try again ", Toast.LENGTH_SHORT).show();
 
             } else {

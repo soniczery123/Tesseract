@@ -23,12 +23,13 @@ repositories {
 }
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
     compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.squareup.retrofit:retrofit:1.6.1'
     testImplementation 'junit:junit:4.12'
-    compile 'com.google.android.gms:play-services-vision:9.8.0'
     compile 'com.rmtheis:tess-two:9.0.0'
-    compile 'com.github.markushi:circlebutton:1.1'
+
+
+    compile 'com.google.code.gson:gson:2.6.2'
+    compile 'com.squareup.retrofit2:retrofit:2.0.2'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.2'
 }

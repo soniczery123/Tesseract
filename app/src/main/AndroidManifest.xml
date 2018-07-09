@@ -41,7 +41,6 @@
             android:screenOrientation="landscape" />
         <activity android:name=".NfcAcitivity"></activity>
 
-
     </application>
 
 </manifest>

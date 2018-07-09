@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -77,6 +79,10 @@ public class MainActivity extends AppCompatActivity {
                                     DOB.getText().toString(),
                                     Sex.getText().toString(),
                                     ExpDate.getText().toString());
+
+                            Gson gson = new Gson();
+                            String json = gson.toJson(p);
+                      //      System.out.println("JSON :\n"+ json);
                         }
                     });
                     builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
