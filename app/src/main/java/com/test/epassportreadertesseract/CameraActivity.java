@@ -49,7 +49,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() + "/Tess";
     private TessBaseAPI tessBaseAPI;
     private Bitmap bitmapCrop;
-    final int RequestCameraPermissionID = 1001;
     private int widthPic, heightPic;
     private int RectLeft, RectTop, RectRight, RectBottom;
     int deviceHeight, deviceWidth;

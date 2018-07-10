@@ -3,16 +3,17 @@
     package="com.test.epassportreadertesseract">
 
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.NFC"/>
+    <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature
         android:name="android.hardware.camera2"
         android:required="false" />
     <uses-feature
         android:name="android.hardware.nfc"
-        android:required="false"/>
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false" />
@@ -34,13 +35,15 @@
             </intent-filter>
         </activity>
 
-        <meta-data android:name="com.google.android.gms.vision.DEPENDENCIES"
-            android:value="ocr"/>
+        <meta-data
+            android:name="com.google.android.gms.vision.DEPENDENCIES"
+            android:value="ocr" />
+
         <activity
             android:name=".CameraActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".NfcAcitivity"></activity>
-
+        <activity android:name=".NfcAcitivity" />
+        <activity android:name=".confirm_data"></activity>
     </application>
 
 </manifest>

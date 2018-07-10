@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,16 +20,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
+import com.test.epassportreadertesseract.Model.InsertResponseModel;
+import com.test.epassportreadertesseract.SaveToDB.ApiInterface;
+import com.test.epassportreadertesseract.SaveToDB.ConnectServer;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
     EditText ID, Firstname, Surname, Sex, DOB, PassType, ExpDate, Nation, CitizenNo;
     Button buttonConfirm;
     final int RequestPermissionCode = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,16 +69,15 @@ public class MainActivity extends AppCompatActivity {
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(checkBlankEditText()){
+                if (checkBlankEditText()) {
                     AlertDialog.Builder builder =
                             new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle("Please check your data");
                     builder.setMessage("Are you sure?");
                     builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            Toast.makeText(getApplicationContext(),
-                                    "Save", Toast.LENGTH_SHORT).show();
-                            People p = new People(PassType.getText().toString(),
+
+                            insertData(PassType.getText().toString(),
                                     Surname.getText().toString(),
                                     Firstname.getText().toString(),
                                     ID.getText().toString(),
@@ -80,9 +87,6 @@ public class MainActivity extends AppCompatActivity {
                                     Sex.getText().toString(),
                                     ExpDate.getText().toString());
 
-                            Gson gson = new Gson();
-                            String json = gson.toJson(p);
-                      //      System.out.println("JSON :\n"+ json);
                         }
                     });
                     builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -198,8 +202,8 @@ public class MainActivity extends AppCompatActivity {
         setText(nPassType, nSurname, nFirstname, nID, nNation, nCitizenNo, nDOB, nSex, nExpDate);
     }
 
-    private void setText(String nPassType,String nSurname,String nFirstname,String nID,String nNation,String nCitizenNo,
-                         String nDOB,String nSex,String nExpDate) {
+    private void setText(String nPassType, String nSurname, String nFirstname, String nID, String nNation, String nCitizenNo,
+                         String nDOB, String nSex, String nExpDate) {
         ID.setText(nID);
         Firstname.setText(checkAlphabet(nFirstname));
         Surname.setText(checkAlphabet(nSurname));
@@ -304,6 +308,7 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
+
     private void RequestRuntimePermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA))
             Toast.makeText(this, "CAMERA permission allows us to access CAMERA app", Toast.LENGTH_SHORT).show();
@@ -311,7 +316,8 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.CAMERA,
                     Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, RequestPermissionCode);
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.INTERNET}, RequestPermissionCode);
         }
     }
 
@@ -326,5 +332,25 @@ public class MainActivity extends AppCompatActivity {
             }
             break;
         }
+    }
+
+    private void insertData(String PassType, String Surname, String Firstname, String ID, String Nation, String CitizenNo, String DOB, String Sex, String ExpDate) {
+        ApiInterface apiService = ConnectServer.getClient().create(ApiInterface.class);
+        Call<InsertResponseModel> call = apiService.insertData(PassType, Surname, Firstname, ID, Nation, CitizenNo, DOB, Sex, ExpDate);
+        call.enqueue(new Callback<InsertResponseModel>() {
+                         @Override
+                         public void onResponse(Call<InsertResponseModel> call, Response<InsertResponseModel> response) {
+                             InsertResponseModel InsertResponse = response.body();
+                             Toast.makeText(MainActivity.this, InsertResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                         }
+
+                         @Override
+                         public void onFailure(Call<InsertResponseModel> call, Throwable t) {
+                             Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                             Log.e("ERROR " , t.getMessage());
+                         }
+                     }
+
+        );
     }
 }
