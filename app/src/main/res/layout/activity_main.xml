@@ -6,13 +6,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="8dp"
+    android:id="@+id/mainLayout"
     tools:context=".MainActivity">
-<ProgressBar
-    android:id="@+id/progressBar"
-    android:layout_width="wrap_content"
-    android:visibility="gone"
-    android:layout_height="wrap_content"
-    android:layout_centerInParent="true"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -35,8 +38,8 @@
                 android:id="@+id/textViewID"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLength="9"
-                android:inputType="textCapCharacters" />
+                android:inputType="textCapCharacters"
+                android:maxLength="9" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -48,9 +51,9 @@
 
             <EditText
                 android:id="@+id/textViewCitizen"
-                android:maxLength="14"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:maxLength="14" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -91,9 +94,9 @@
             <EditText
                 android:id="@+id/textViewSex"
                 android:layout_width="match_parent"
-                android:maxLength="1"
                 android:layout_height="wrap_content"
-                android:inputType="textCapCharacters" />
+                android:inputType="textCapCharacters"
+                android:maxLength="1" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -148,19 +151,19 @@
             <EditText
                 android:id="@+id/textViewNation"
                 android:layout_width="wrap_content"
-                android:maxLength="3"
                 android:layout_height="wrap_content"
-                android:inputType="textCapCharacters" />
+                android:inputType="textCapCharacters"
+                android:maxLength="3" />
 
             <Button
                 android:id="@+id/buttonConfirm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:textColor="#FFFFFF"
-                android:textSize="18dp"
                 android:background="@color/colorBlue"
-                android:text="Confirm" />
+                android:text="Confirm"
+                android:textColor="#FFFFFF"
+                android:textSize="18dp" />
         </TableLayout>
     </ScrollView>
 

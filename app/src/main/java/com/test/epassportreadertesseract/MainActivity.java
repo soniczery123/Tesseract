@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     Button buttonConfirm;
     final int RequestPermissionCode = 1;
     ProgressBar progressBar;
-
+    RelativeLayout mainLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar.getIndeterminateDrawable()
                 .setColorFilter(Color.parseColor("#ff3eaff9"), PorterDuff.Mode.SRC_IN);
         buttonConfirm = (Button) findViewById(R.id.buttonConfirm);
+        mainLayout = (RelativeLayout)findViewById(R.id.mainLayout);
 
         ID = (EditText) findViewById(R.id.textViewID);
         CitizenNo = (EditText) findViewById(R.id.textViewCitizen);
@@ -115,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 progressBar.setVisibility(View.VISIBLE);
+                mainLayout.setBackgroundResource(R.color.colorBlackSmoke);
                 insertData(PassType_Con.getText().toString(),
                         Surname_Con.getText().toString(),
                         Firstname_Con.getText().toString(),
@@ -258,12 +261,14 @@ public class MainActivity extends AppCompatActivity {
                          public void onResponse(Call<InsertResponseModel> call, Response<InsertResponseModel> response) {
                              InsertResponseModel InsertResponse = response.body();
                              progressBar.setVisibility(View.GONE);
+                             mainLayout.setBackgroundResource(R.color.colorWhite);
                              Toast.makeText(MainActivity.this, InsertResponse.getMessage(), Toast.LENGTH_SHORT).show();
                          }
 
                          @Override
                          public void onFailure(Call<InsertResponseModel> call, Throwable t) {
                              progressBar.setVisibility(View.GONE);
+                             mainLayout.setBackgroundResource(R.color.colorWhite);
                              Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                              Log.e("ERROR ", t.getMessage());
                          }
