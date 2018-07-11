@@ -29,9 +29,6 @@ import com.test.epassportreadertesseract.Model.InsertResponseModel;
 import com.test.epassportreadertesseract.SaveToDB.ApiInterface;
 import com.test.epassportreadertesseract.SaveToDB.ConnectServer;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -70,8 +67,8 @@ public class MainActivity extends AppCompatActivity {
         ExpDate = (EditText) findViewById(R.id.textViewExpDate);
         Nation = (EditText) findViewById(R.id.textViewNation);
         Intent intent = getIntent();
-        String result = intent.getStringExtra("result");
-        if (result != null && !result.isEmpty()) extractString(result);
+        String[] result = intent.getStringArrayExtra("result");
+        if (result != null && result.length!=0) setText(result);
         final Activity activity = this;
 
 
@@ -106,9 +103,9 @@ public class MainActivity extends AppCompatActivity {
         Nation_Con = (TextView) view.findViewById(R.id.textViewNation_Con);
 
         ID_Con.setText(ID.getText().toString().toUpperCase());
-        Firstname_Con.setText(checkAlphabet(Firstname.getText().toString()).toUpperCase());
-        Surname_Con.setText(checkAlphabet(Surname.getText().toString()).toUpperCase());
-        Sex_Con.setText(checkAlphabet(Sex.getText().toString()).toUpperCase());
+        Firstname_Con.setText(Firstname.getText().toString().toUpperCase());
+        Surname_Con.setText((Surname.getText().toString()).toUpperCase());
+        Sex_Con.setText(Sex.getText().toString().toUpperCase());
         CitizenNo_Con.setText(CitizenNo.getText().toString().toUpperCase());
         DOB_Con.setText(DOB.getText().toString().toUpperCase());
         PassType_Con.setText(PassType.getText().toString().toUpperCase());
@@ -139,124 +136,20 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void extractString(String mrzResult) {
-        String nID = "", nFirstname = "", nSurname = "", nSex = "", nDOB = "", nPassType = "", nExpDate = "", nNation = "", nCitizenNo = "";
-        String line1 = mrzResult.split("\n")[0];
-        String line2 = mrzResult.split("\n")[1];
-        line1 = line1.replace(" ", "");
-        line2 = line2.replace(" ", "");
-        String arrLine1[] = line1.split("<");
-        String arrLine2[] = line2.split("<");
-        //  Log.i("1",line1);
-        // Log.i("1", line2);
-        String removeEmp1 = "";
-        String removeEmp2 = "";
-        for (int i = 0; i < arrLine1.length; i++) {
-            if (!arrLine1[i].isEmpty()) {
-                removeEmp1 += arrLine1[i] + ",";
-                //  Log.i("1",removeEmp1);
-            }
-        }
-        for (int i = 0; i < arrLine2.length; i++) {
-            if (!arrLine2[i].isEmpty()) {
-                removeEmp2 += arrLine2[i] + ",";
-                // Log.i("1", removeEmp2);
-            }
-        }
-        arrLine1 = removeEmp1.split(",");
-        arrLine2 = removeEmp2.split(",");
-        //  Log.i("1",arrLine1.length+"");
-        //  Log.i("1",arrLine2.length+"");
-        nPassType = arrLine1[0];
-        nSurname = arrLine1[1].substring(3, arrLine1[1].length()).trim();
-        for (int i = 2; i < arrLine1.length; i++) {
-            nFirstname += arrLine1[i] + " ";
-        }
-        nFirstname = nFirstname.trim();
-        int count = 0;
-        for (int i = 0; i < arrLine2.length; i++) {
-            if (!arrLine2[i].isEmpty()) {
-                count++;
-            }
-        }
-        int indexArr1 = 0;
-        int indexArr2 = 0;
-        int startID = 0;
-        int stopID = 9;
-        int startNation = 10;
-        int startDOBY = 13;
-        int startDOBM = 15;
-        int startDOBD = 17;
-        int startSex = 20;
-        int startExpY = 21;
-        int startExpM = 23;
-        int startExpD = 25;
-        int startCitizenID = 28;
 
-        if (arrLine2.length == 3) {
-            indexArr1 = 0;
-            indexArr2 = 1;
-            startID = 0;
-            stopID = arrLine2[0].length();
-            startNation = 1;
-            startDOBY = 4;
-            startDOBM = 6;
-            startDOBD = 8;
-            startSex = 11;
-            startExpY = 12;
-            startExpM = 14;
-            startExpD = 16;
-            startCitizenID = 18;
-        }
 
-        nID = arrLine2[indexArr1].substring(startID, stopID);
-        nNation = arrLine2[indexArr2].substring(startNation, startNation + 3);
-
-        try {
-            int y = Integer.parseInt(arrLine2[indexArr2].substring(startDOBY, startDOBY + 2));
-            int m = Integer.parseInt(arrLine2[indexArr2].substring(startDOBM, startDOBM + 2));
-            int d = Integer.parseInt(arrLine2[indexArr2].substring(startDOBD, startDOBD + 2));
-            nDOB = new SimpleDateFormat("yy/MM/dd").format(new Date(y, m - 1, d));
-        } catch (Exception e) {
-            Toast.makeText(this, "Please fill in your Date of Birth", Toast.LENGTH_SHORT).show();
-        }
-
-        nSex = arrLine2[indexArr2].substring(startSex, startSex + 1);
-
-        try {
-            int y = Integer.parseInt(arrLine2[indexArr2].substring(startExpY, startExpY + 2));
-            int m = Integer.parseInt(arrLine2[indexArr2].substring(startExpM, startExpM + 2));
-            int d = Integer.parseInt(arrLine2[indexArr2].substring(startExpD, startExpD + 2));
-            nExpDate = new SimpleDateFormat("yy/MM/dd").format(new Date(y, m - 1, d));
-
-        } catch (Exception e) {
-            Toast.makeText(this, "Please fill in your Date of Expiry", Toast.LENGTH_SHORT).show();
-        }
-
-        nCitizenNo = arrLine2[indexArr2].substring(startCitizenID, arrLine2[indexArr2].length());
-        setText(nPassType, nSurname, nFirstname, nID, nNation, nCitizenNo, nDOB, nSex, nExpDate);
+    private void setText(String[] result) {
+        ID.setText(result[0]);
+        CitizenNo.setText(result[1]);
+        Firstname.setText(result[2]);
+        Surname.setText(result[3]);
+        Sex.setText(result[4]);
+        DOB.setText(result[5]);
+        PassType.setText(result[6]);
+        ExpDate.setText(result[7]);
+        Nation.setText(result[8]);
     }
 
-    private void setText(String nPassType, String nSurname, String nFirstname, String nID, String nNation, String nCitizenNo,
-                         String nDOB, String nSex, String nExpDate) {
-        ID.setText(nID);
-        Firstname.setText(checkAlphabet(nFirstname));
-        Surname.setText(checkAlphabet(nSurname));
-        Sex.setText(checkAlphabet(nSex));
-        CitizenNo.setText(nCitizenNo);
-        DOB.setText(nDOB);
-        PassType.setText(checkAlphabet(nPassType));
-        ExpDate.setText(nExpDate);
-        Nation.setText(checkAlphabet(nNation));
-    }
-
-    String checkAlphabet(String str) {
-        if (str.contains("1") || str.contains("2") || str.contains("3") || str.contains("4") || str.contains("5") ||
-                str.contains("6") || str.contains("7") || str.contains("8") || str.contains("9") || str.contains("0")) {
-            return "";
-        }
-        return str;
-    }
 
     private boolean checkBlankEditText() {
         boolean check = true;

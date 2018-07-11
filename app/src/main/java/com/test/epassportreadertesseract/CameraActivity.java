@@ -35,7 +35,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -54,7 +56,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     int deviceHeight, deviceWidth;
     Timer timer = new Timer();
     String result = "";
-
+    String nID = "", nFirstname = "", nSurname = "", nSex = "", nDOB = "", nPassType = "", nExpDate = "", nNation = "", nCitizenNo = "";
 
 
     @Override
@@ -155,7 +157,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         }
 
     }
-    
+
     Camera.AutoFocusCallback myAutoFocusCallback = new Camera.AutoFocusCallback() {
 
         @Override
@@ -373,10 +375,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             bitmapCrop = Bitmap.createBitmap(bitmapCrop, RectLeft, RectTop+30, RectRight - RectLeft , RectBottom - RectTop);
 
             result = getText();
-
+            extractString(result);
             System.out.println(result);
 
-             if (result.length() != 89) {
+             if (nCitizenNo.isEmpty() || nDOB.isEmpty() || nExpDate.isEmpty() || nFirstname.isEmpty() || nID.isEmpty()
+                     || nSurname.isEmpty() || nPassType.isEmpty() || nNation.isEmpty() || nSex.isEmpty()) {
                 Toast.makeText(this, "Please try again ", Toast.LENGTH_SHORT).show();
 
             } else {
@@ -397,8 +400,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
                     public void onFinish() {
                         // Finish
+                        String[] arResult  = new String[]{nID,nCitizenNo,nFirstname,nSurname,nSex,nDOB,nPassType,nExpDate,nNation};
                         Intent intent = new Intent(CameraActivity.this, MainActivity.class);
-                        intent.putExtra("result", result);
+                        intent.putExtra("result", arResult);
                         startActivity(intent);
                         finish();
                     }
@@ -437,7 +441,129 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         return result.replace(" ", "");
     }
 
+    private void extractString(String mrzResult) {
+        String line1 = mrzResult.split("\n")[0];
+        String line2 = mrzResult.split("\n")[1];
+        line1 = line1.replace(" ", "");
+        line2 = line2.replace(" ", "");
+        String arrLine1[] = line1.split("<");
+        String arrLine2[] = line2.split("<");
+        //  Log.i("1",line1);
+        // Log.i("1", line2);
+        String removeEmp1 = "";
+        String removeEmp2 = "";
+        for (int i = 0; i < arrLine1.length; i++) {
+            if (!arrLine1[i].isEmpty()) {
+                removeEmp1 += arrLine1[i] + ",";
+                //  Log.i("1",removeEmp1);
+            }
+        }
+        for (int i = 0; i < arrLine2.length; i++) {
+            if (!arrLine2[i].isEmpty()) {
+                removeEmp2 += arrLine2[i] + ",";
+                // Log.i("1", removeEmp2);
+            }
+        }
+        arrLine1 = removeEmp1.split(",");
+        arrLine2 = removeEmp2.split(",");
+        //  Log.i("1",arrLine1.length+"");
+        //  Log.i("1",arrLine2.length+"");
+        nPassType = arrLine1[0];
+        nSurname = checkAlphabet(arrLine1[1].substring(3, arrLine1[1].length()).trim());
+        nFirstname = "";
+        for (int i = 2; i < arrLine1.length; i++) {
+            nFirstname += arrLine1[i] + " ";
+        }
+        nFirstname = nFirstname.trim();
 
+
+        int indexArr1 = 0;
+        int indexArr2 = 0;
+        int startID = 0;
+        int stopID = 9;
+        int startNation = 10;
+        int startDOBY = 13;
+        int startDOBM = 15;
+        int startDOBD = 17;
+        int startSex = 20;
+        int startExpY = 21;
+        int startExpM = 23;
+        int startExpD = 25;
+        int startCitizenID = 28;
+
+        if (arrLine2.length == 3) {
+            indexArr1 = 0;
+            indexArr2 = 1;
+            startID = 0;
+            stopID = arrLine2[0].length();
+            startNation = 1;
+            startDOBY = 4;
+            startDOBM = 6;
+            startDOBD = 8;
+            startSex = 11;
+            startExpY = 12;
+            startExpM = 14;
+            startExpD = 16;
+            startCitizenID = 18;
+        }
+
+        nID = checkLastDigit(arrLine2[indexArr1].substring(startID, stopID),Integer.parseInt(arrLine2[indexArr1].charAt(stopID)+""));
+        nNation = checkAlphabet(arrLine2[indexArr2].substring(startNation, startNation + 3));
+
+        try {
+            int y = Integer.parseInt(arrLine2[indexArr2].substring(startDOBY, startDOBY + 2));
+            int m = Integer.parseInt(arrLine2[indexArr2].substring(startDOBM, startDOBM + 2));
+            int d = Integer.parseInt(arrLine2[indexArr2].substring(startDOBD, startDOBD + 2));
+            String strDate = arrLine2[indexArr2].substring(startDOBY, startDOBD + 2);
+            if(!checkLastDigit(strDate,Integer.parseInt(arrLine2[indexArr2].charAt(startDOBD+2)+"")).isEmpty())
+                nDOB = new SimpleDateFormat("yy/MM/dd").format(new Date(y, m - 1, d));
+        } catch (Exception e) {
+
+        }
+
+        nSex = checkAlphabet(arrLine2[indexArr2].substring(startSex, startSex + 1));
+
+        try {
+            int y = Integer.parseInt(arrLine2[indexArr2].substring(startExpY, startExpY + 2));
+            int m = Integer.parseInt(arrLine2[indexArr2].substring(startExpM, startExpM + 2));
+            int d = Integer.parseInt(arrLine2[indexArr2].substring(startExpD, startExpD + 2));
+            String strDate = arrLine2[indexArr2].substring(startExpY, startExpD + 2);
+            if(!checkLastDigit(strDate,Integer.parseInt(arrLine2[indexArr2].charAt(startExpD+2)+"")).isEmpty())
+                nExpDate = new SimpleDateFormat("yy/MM/dd").format(new Date(y, m - 1, d));
+
+        } catch (Exception e) {
+
+        }
+
+        nCitizenNo = arrLine2[indexArr2].substring(startCitizenID, arrLine2[indexArr2].length());
+
+    }
+    String checkAlphabet(String str) {
+        if (str.contains("1") || str.contains("2") || str.contains("3") || str.contains("4") || str.contains("5") ||
+                str.contains("6") || str.contains("7") || str.contains("8") || str.contains("9") || str.contains("0")) {
+            return "";
+        }
+        return str;
+    }
+
+    private String checkLastDigit(String str,int lastDigit){
+        int count = 7 ;
+        int sum = 0 ;
+        for(int i = 0 ; i < str.length() ; i++){
+            int score = 0;
+            if((int)str.charAt(i) >= 65 && (int)str.charAt(i) <= 90){
+                score = (int)str.charAt(i) - 65 ;
+            }else {
+                score = Integer.parseInt(String.valueOf(str.charAt(i)));
+            }
+            sum += score*count;
+            if(count == 7) count = 3;
+            else if(count == 3) count = 1;
+            else count = 7;
+        }
+        if (sum%10 == lastDigit) return str;
+        else return "";
+    }
     @Override
     public void onBackPressed() {
         super.onBackPressed();
