@@ -54,65 +54,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     int deviceHeight, deviceWidth;
     Timer timer = new Timer();
     String result = "";
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            float x = event.getX();
-            float y = event.getY();
-            System.out.println("TOUCH " + x+" "+y);
-            Rect rect = calculateFocusArea(event.getX(), event.getY());
-            doTouchFocus(rect);
 
-        }
-        return false;
-    }
-    private Rect calculateFocusArea(float x, float y) {
-        int FOCUS_AREA_SIZE = 300;
-        int left = clamp(Float.valueOf((x / widthPic * 2000 - 1000)).intValue(), FOCUS_AREA_SIZE);
-        int top = clamp(Float.valueOf((y / heightPic * 2000 - 1000)).intValue(), FOCUS_AREA_SIZE);
-        return new Rect(left, top, left + FOCUS_AREA_SIZE, top + FOCUS_AREA_SIZE);
-    }
 
-    private int clamp(int touchCoordinateInCameraReper, int focusAreaSize) {
-        int result;
-        if (Math.abs(touchCoordinateInCameraReper)+focusAreaSize/2>1000){
-            if (touchCoordinateInCameraReper>0){
-                result = 1000 - focusAreaSize/2;
-            } else {
-                result = -1000 + focusAreaSize/2;
-            }
-        } else{
-            result = touchCoordinateInCameraReper - focusAreaSize/2;
-        }
-        return result;
-    }
-    private void doTouchFocus(final Rect tfocusRect) {
-        try {
-            final List<Camera.Area> focusList = new ArrayList<Camera.Area>();
-            Camera.Area focusArea = new Camera.Area(tfocusRect, 1000);
-            focusList.add(focusArea);
 
-            Camera.Parameters para = camera.getParameters();
-            para.setFocusAreas(focusList);
-            para.setMeteringAreas(focusList);
-            camera.setParameters(para);
-            camera.autoFocus(myAutoFocusCallback);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    Camera.AutoFocusCallback myAutoFocusCallback = new Camera.AutoFocusCallback() {
-
-        @Override
-        public void onAutoFocus(boolean arg0, Camera arg1) {
-           // if (arg0) {
-                //camera.takePicture(null,null,mPicture);
-                camera.cancelAutoFocus();
-          //  }
-        }
-    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,6 +105,67 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         }, 0, 2900);
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            float x = event.getX();
+            float y = event.getY();
+            System.out.println("TOUCH " + x+" "+y);
+            Rect rect = calculateFocusArea(event.getX(), event.getY());
+            doTouchFocus(rect);
+
+        }
+        return false;
+    }
+
+    private Rect calculateFocusArea(float x, float y) {
+        int FOCUS_AREA_SIZE = 300;
+        int left = clamp(Float.valueOf((x / widthPic * 2000 - 1000)).intValue(), FOCUS_AREA_SIZE);
+        int top = clamp(Float.valueOf((y / heightPic * 2000 - 1000)).intValue(), FOCUS_AREA_SIZE);
+        return new Rect(left, top, left + FOCUS_AREA_SIZE, top + FOCUS_AREA_SIZE);
+    }
+
+    private int clamp(int touchCoordinateInCameraReper, int focusAreaSize) {
+        int result;
+        if (Math.abs(touchCoordinateInCameraReper)+focusAreaSize/2>1000){
+            if (touchCoordinateInCameraReper>0){
+                result = 1000 - focusAreaSize/2;
+            } else {
+                result = -1000 + focusAreaSize/2;
+            }
+        } else{
+            result = touchCoordinateInCameraReper - focusAreaSize/2;
+        }
+        return result;
+    }
+
+    private void doTouchFocus(final Rect tfocusRect) {
+        try {
+            final List<Camera.Area> focusList = new ArrayList<Camera.Area>();
+            Camera.Area focusArea = new Camera.Area(tfocusRect, 1000);
+            focusList.add(focusArea);
+
+            Camera.Parameters para = camera.getParameters();
+            para.setFocusAreas(focusList);
+            para.setMeteringAreas(focusList);
+            camera.setParameters(para);
+            camera.autoFocus(myAutoFocusCallback);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+    
+    Camera.AutoFocusCallback myAutoFocusCallback = new Camera.AutoFocusCallback() {
+
+        @Override
+        public void onAutoFocus(boolean arg0, Camera arg1) {
+            // if (arg0) {
+            //camera.takePicture(null,null,mPicture);
+            camera.cancelAutoFocus();
+            //  }
+        }
+    };
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -432,103 +437,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         return result.replace(" ", "");
     }
 
-    public Bitmap resize(Bitmap img, int newWidth, int newHeight) {
-        Bitmap bmap = img.copy(img.getConfig(), true);
-
-        double nWidthFactor = (double) img.getWidth() / (double) newWidth;
-        double nHeightFactor = (double) img.getHeight() / (double) newHeight;
-
-        double fx, fy, nx, ny;
-        int cx, cy, fr_x, fr_y;
-        int color1;
-        int color2;
-        int color3;
-        int color4;
-        byte nRed, nGreen, nBlue;
-
-        byte bp1, bp2;
-
-        for (int x = 0; x < bmap.getWidth(); ++x) {
-            for (int y = 0; y < bmap.getHeight(); ++y) {
-
-                fr_x = (int) Math.floor(x * nWidthFactor);
-                fr_y = (int) Math.floor(y * nHeightFactor);
-                cx = fr_x + 1;
-                if (cx >= img.getWidth())
-                    cx = fr_x;
-                cy = fr_y + 1;
-                if (cy >= img.getHeight())
-                    cy = fr_y;
-                fx = x * nWidthFactor - fr_x;
-                fy = y * nHeightFactor - fr_y;
-                nx = 1.0 - fx;
-                ny = 1.0 - fy;
-
-                color1 = img.getPixel(fr_x, fr_y);
-                color2 = img.getPixel(cx, fr_y);
-                color3 = img.getPixel(fr_x, cy);
-                color4 = img.getPixel(cx, cy);
-
-                // Blue
-                bp1 = (byte) (nx * Color.blue(color1) + fx * Color.blue(color2));
-                bp2 = (byte) (nx * Color.blue(color3) + fx * Color.blue(color4));
-                nBlue = (byte) (ny * (double) (bp1) + fy * (double) (bp2));
-
-                // Green
-                bp1 = (byte) (nx * Color.green(color1) + fx * Color.green(color2));
-                bp2 = (byte) (nx * Color.green(color3) + fx * Color.green(color4));
-                nGreen = (byte) (ny * (double) (bp1) + fy * (double) (bp2));
-
-                // Red
-                bp1 = (byte) (nx * Color.red(color1) + fx * Color.red(color2));
-                bp2 = (byte) (nx * Color.red(color3) + fx * Color.red(color4));
-                nRed = (byte) (ny * (double) (bp1) + fy * (double) (bp2));
-
-                bmap.setPixel(x, y, Color.argb(255, nRed, nGreen, nBlue));
-            }
-        }
-
-        bmap = setGrayscale(bmap);
-        bmap = removeNoise(bmap);
-
-        return bmap;
-    }
-
-    private Bitmap setGrayscale(Bitmap img) {
-        Bitmap bmap = img.copy(img.getConfig(), true);
-        int c;
-        for (int i = 0; i < bmap.getWidth(); i++) {
-            for (int j = 0; j < bmap.getHeight(); j++) {
-                c = bmap.getPixel(i, j);
-                byte gray = (byte) (.299 * Color.red(c) + .587 * Color.green(c)
-                        + .114 * Color.blue(c));
-
-                bmap.setPixel(i, j, Color.argb(255, gray, gray, gray));
-            }
-        }
-        return bmap;
-    }
-
-    // RemoveNoise
-    private Bitmap removeNoise(Bitmap bmap) {
-        for (int x = 0; x < bmap.getWidth(); x++) {
-            for (int y = 0; y < bmap.getHeight(); y++) {
-                int pixel = bmap.getPixel(x, y);
-                if (Color.red(pixel) < 162 && Color.green(pixel) < 162 && Color.blue(pixel) < 162) {
-                    bmap.setPixel(x, y, Color.BLACK);
-                }
-            }
-        }
-        for (int x = 0; x < bmap.getWidth(); x++) {
-            for (int y = 0; y < bmap.getHeight(); y++) {
-                int pixel = bmap.getPixel(x, y);
-                if (Color.red(pixel) > 162 && Color.green(pixel) > 162 && Color.blue(pixel) > 162) {
-                    bmap.setPixel(x, y, Color.WHITE);
-                }
-            }
-        }
-        return bmap;
-    }
 
     @Override
     public void onBackPressed() {

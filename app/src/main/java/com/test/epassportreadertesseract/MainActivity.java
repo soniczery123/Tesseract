@@ -6,6 +6,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,11 +15,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.test.epassportreadertesseract.Model.InsertResponseModel;
@@ -34,8 +39,10 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
     EditText ID, Firstname, Surname, Sex, DOB, PassType, ExpDate, Nation, CitizenNo;
+    TextView ID_Con, Firstname_Con, Surname_Con, Sex_Con, DOB_Con, PassType_Con, ExpDate_Con, Nation_Con, CitizenNo_Con;
     Button buttonConfirm;
     final int RequestPermissionCode = 1;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +55,9 @@ public class MainActivity extends AppCompatActivity {
         if (permissionCheck1 == PackageManager.PERMISSION_DENIED || permissionCheck2 == PackageManager.PERMISSION_DENIED
                 || permissionCheck3 == PackageManager.PERMISSION_DENIED)
             RequestRuntimePermission();
-
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.getIndeterminateDrawable()
+                .setColorFilter(Color.parseColor("#ff3eaff9"), PorterDuff.Mode.SRC_IN);
         buttonConfirm = (Button) findViewById(R.id.buttonConfirm);
 
         ID = (EditText) findViewById(R.id.textViewID);
@@ -70,39 +79,65 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (checkBlankEditText()) {
-                    AlertDialog.Builder builder =
-                            new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Please check your data");
-                    builder.setMessage("Are you sure?");
-                    builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-
-                            insertData(PassType.getText().toString(),
-                                    Surname.getText().toString(),
-                                    Firstname.getText().toString(),
-                                    ID.getText().toString(),
-                                    Nation.getText().toString(),
-                                    CitizenNo.getText().toString(),
-                                    DOB.getText().toString(),
-                                    Sex.getText().toString(),
-                                    ExpDate.getText().toString());
-
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //dialog.dismiss();
-                        }
-                    });
-                    builder.show();
-
+                    progressBar.setVisibility(View.VISIBLE);
+                    showDialog();
                 }
             }
         });
 
     }
 
+    private void showDialog() {
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(MainActivity.this);
+        LayoutInflater inflater = getLayoutInflater();
+
+        View view = inflater.inflate(R.layout.activity_confirm_data, null);
+        builder.setView(view);
+
+        ID_Con = (TextView) view.findViewById(R.id.textViewID_Con);
+        CitizenNo_Con = (TextView) view.findViewById(R.id.textViewCitizen_Con);
+        Firstname_Con = (TextView) view.findViewById(R.id.textViewFirstName_Con);
+        Surname_Con = (TextView) view.findViewById(R.id.textViewSurname_Con);
+        Sex_Con = (TextView) view.findViewById(R.id.textViewSex_Con);
+        DOB_Con = (TextView) view.findViewById(R.id.textViewDOB_Con);
+        PassType_Con = (TextView) view.findViewById(R.id.textViewPassportType_Con);
+        ExpDate_Con = (TextView) view.findViewById(R.id.textViewExpDate_Con);
+        Nation_Con = (TextView) view.findViewById(R.id.textViewNation_Con);
+
+        ID_Con.setText(ID.getText().toString().toUpperCase());
+        Firstname_Con.setText(checkAlphabet(Firstname.getText().toString()).toUpperCase());
+        Surname_Con.setText(checkAlphabet(Surname.getText().toString()).toUpperCase());
+        Sex_Con.setText(checkAlphabet(Sex.getText().toString()).toUpperCase());
+        CitizenNo_Con.setText(CitizenNo.getText().toString().toUpperCase());
+        DOB_Con.setText(DOB.getText().toString().toUpperCase());
+        PassType_Con.setText(PassType.getText().toString().toUpperCase());
+        ExpDate_Con.setText(ExpDate.getText().toString().toUpperCase());
+        Nation_Con.setText(Nation.getText().toString().toUpperCase());
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                progressBar.setVisibility(View.VISIBLE);
+                insertData(PassType_Con.getText().toString(),
+                        Surname_Con.getText().toString(),
+                        Firstname_Con.getText().toString(),
+                        ID_Con.getText().toString(),
+                        Nation_Con.getText().toString(),
+                        CitizenNo_Con.getText().toString(),
+                        DOB_Con.getText().toString(),
+                        Sex_Con.getText().toString(),
+                        ExpDate_Con.getText().toString());
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        progressBar.setVisibility(View.GONE);
+        builder.show();
+    }
 
     private void extractString(String mrzResult) {
         String nID = "", nFirstname = "", nSurname = "", nSex = "", nDOB = "", nPassType = "", nExpDate = "", nNation = "", nCitizenNo = "";
@@ -264,18 +299,6 @@ public class MainActivity extends AppCompatActivity {
         return check;
     }
 
-    private void clearText() {
-        ID.setText("");
-        Firstname.setText("");
-        Surname.setText("");
-        Sex.setText("");
-        CitizenNo.setText("");
-        DOB.setText("");
-        PassType.setText("");
-        ExpDate.setText("");
-        Nation.setText("");
-    }
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -341,13 +364,15 @@ public class MainActivity extends AppCompatActivity {
                          @Override
                          public void onResponse(Call<InsertResponseModel> call, Response<InsertResponseModel> response) {
                              InsertResponseModel InsertResponse = response.body();
+                             progressBar.setVisibility(View.GONE);
                              Toast.makeText(MainActivity.this, InsertResponse.getMessage(), Toast.LENGTH_SHORT).show();
                          }
 
                          @Override
                          public void onFailure(Call<InsertResponseModel> call, Throwable t) {
+                             progressBar.setVisibility(View.GONE);
                              Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-                             Log.e("ERROR " , t.getMessage());
+                             Log.e("ERROR ", t.getMessage());
                          }
                      }
 

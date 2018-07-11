@@ -43,7 +43,6 @@
             android:name=".CameraActivity"
             android:screenOrientation="landscape" />
         <activity android:name=".NfcAcitivity" />
-        <activity android:name=".confirm_data"></activity>
     </application>
 
 </manifest>
