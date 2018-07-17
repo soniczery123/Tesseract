@@ -101,10 +101,15 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                camera.takePicture(null, null, mPicture);
+                try {
+                    camera.takePicture(null, null, mPicture);
+                }catch (Exception e){
+
+                }
+
             }
 
-        }, 0, 2900);
+        }, 0, 3000);
     }
 
     @Override
@@ -374,7 +379,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             options.inSampleSize = 6;
             bitmapCrop = Bitmap.createBitmap(bitmapCrop, RectLeft, RectTop+30, RectRight - RectLeft , RectBottom - RectTop);
 
-            result = getText();
+            result = getTextResult();
             extractString(result);
             System.out.println(result);
 
@@ -385,11 +390,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             } else {
                 ImageView img = (ImageView)findViewById(R.id.img);
                 FrameLayout frameLayout = (FrameLayout)findViewById(R.id.frameLayout);
-                img.setImageBitmap(bitmapCrop);
                 Animation resize = AnimationUtils.loadAnimation(CameraActivity.this, R.anim.resize);
                 Animation blink = AnimationUtils.loadAnimation(CameraActivity.this, R.anim.blink);
 
-
+                img.setImageBitmap(bitmapCrop);
                 img.startAnimation(resize);
                 frameLayout.startAnimation(blink);
                 timer.cancel();
@@ -415,7 +419,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         }
     }
 
-    private String getText() {
+    private String getTextResult() {
 
         try {
             tessBaseAPI = new TessBaseAPI();
@@ -424,9 +428,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         }
         String dataPath = getExternalFilesDir("/").getPath() + "/";
         bitmapCrop = bitmapCrop.copy(Bitmap.Config.ARGB_8888, true);
-        //bitmapCrop = resize(bitmapCrop,bitmapCrop.getWidth(),bitmapCrop.getHeight());
-        // bitmapCrop = setGrayscale(bitmapCrop);
-        //bitmapCrop = removeNoise(bitmapCrop);
         tessBaseAPI.init(dataPath, "mrz");
         tessBaseAPI.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890<");
         tessBaseAPI.setImage(bitmapCrop);
@@ -443,7 +444,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     private void extractString(String mrzResult) {
         String line1 = mrzResult.split("\n")[0];
-        String line2 = mrzResult.split("\n")[1];  System.out.println(checkAll);
+        String line2 = mrzResult.split("\n")[1];
 
         checkAll = line2.substring(0,10)+line2.substring(13,20)+ line2.substring(21,43);
         try {
@@ -548,6 +549,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
 
     }
+
     String checkAlphabet(String str) {
         if (str.contains("1") || str.contains("2") || str.contains("3") || str.contains("4") || str.contains("5") ||
                 str.contains("6") || str.contains("7") || str.contains("8") || str.contains("9") || str.contains("0")) {

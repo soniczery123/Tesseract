@@ -5,7 +5,7 @@ android {
     defaultConfig {
         applicationId "com.test.epassportreadertesseract"
         minSdkVersion 22
-        targetSdkVersion 22
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -22,15 +22,16 @@ repositories {
     mavenLocal()
 }
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.squareup.retrofit:retrofit:1.6.1'
     testImplementation 'junit:junit:4.12'
     compile 'com.rmtheis:tess-two:9.0.0'
-
     compile 'com.squareup.okhttp3:logging-interceptor:3.3.1'
     compile 'com.google.code.gson:gson:2.6.2'
     compile 'com.squareup.retrofit2:retrofit:2.0.2'
     compile 'com.squareup.retrofit2:converter-gson:2.0.2'
+    compile project(':ePassportReadingAeA')
+
 }

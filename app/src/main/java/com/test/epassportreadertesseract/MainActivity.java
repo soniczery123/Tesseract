@@ -1,7 +1,6 @@
 package com.test.epassportreadertesseract;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,7 +36,7 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
     EditText ID, Firstname, Surname, Sex, DOB, PassType, ExpDate, Nation, CitizenNo;
-    TextView ID_Con, Firstname_Con, Surname_Con, Sex_Con, DOB_Con, PassType_Con, ExpDate_Con, Nation_Con, CitizenNo_Con;
+    TextView ID_Con, Firstname_Con, Surname_Con, Sex_Con, DOB_Con, PassType_Con, ExpDate_Con, Nation_Con, CitizenNo_Con,titleDialog;
     Button buttonConfirm;
     final int RequestPermissionCode = 1;
     ProgressBar progressBar;
@@ -68,11 +67,10 @@ public class MainActivity extends AppCompatActivity {
         PassType = (EditText) findViewById(R.id.textViewPassportType);
         ExpDate = (EditText) findViewById(R.id.textViewExpDate);
         Nation = (EditText) findViewById(R.id.textViewNation);
+
         Intent intent = getIntent();
         String[] result = intent.getStringArrayExtra("result");
         if (result != null && result.length!=0) setText(result);
-        final Activity activity = this;
-
 
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,13 +85,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showDialog() {
+
         AlertDialog.Builder builder =
                 new AlertDialog.Builder(MainActivity.this);
         LayoutInflater inflater = getLayoutInflater();
 
         View view = inflater.inflate(R.layout.activity_confirm_data, null);
         builder.setView(view);
-
+        titleDialog = (TextView)view.findViewById(R.id.titleDialog);
+        titleDialog.setText(R.string.title_dialog_confirm);
         ID_Con = (TextView) view.findViewById(R.id.textViewID_Con);
         CitizenNo_Con = (TextView) view.findViewById(R.id.textViewCitizen_Con);
         Firstname_Con = (TextView) view.findViewById(R.id.textViewFirstName_Con);
@@ -223,6 +223,9 @@ public class MainActivity extends AppCompatActivity {
                 intent = new Intent(MainActivity.this, NfcAcitivity.class);
                 startActivity(intent);
             }
+        }else{
+            intent = new Intent(MainActivity.this, ListResult.class);
+            startActivity(intent);
         }
 
         return true;

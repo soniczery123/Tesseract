@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">EPassportReader</string>
+    <string name="title_dialog_confirm">Please check your data</string>
+    <string name="title_dialog_show_data">All data detail</string>
+    <!-- Main activity -->
+    <string name="main_textView">Choose credentials entry for ePassport reading</string>
+    <string name="main_addCredentials">New Entry</string>
+    <string name="credentials_bDate">Birth Date</string>
+    <string name="credentials_eDate">Expiration Date</string>
+    <string name="credentials_DocNumber">Document Number</string>
+
+    <!-- Action Bar -->
+    <string name="actionBar_add">Add</string>
+    <string name="title_activity_credential_editor">CredentialEditor</string>
+
+    <!-- Editor Save Button -->
+    <string name="editor_saveButton">Save</string>
+    <string name="title_activity_reader">ReaderActivity</string>
+    <string name="title_activity_e_passport_info_display">ePassportInfoDisplay</string>
+
+    <string name="aproximatePassport">Aproxime um passaporte para iniciar a leitura</string>
+
 </resources>
