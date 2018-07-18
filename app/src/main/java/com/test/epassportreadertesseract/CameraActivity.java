@@ -405,7 +405,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     public void onFinish() {
                         // Finish
                         String[] arResult  = new String[]{nID,nCitizenNo,nFirstname,nSurname,nSex,nDOB,nPassType,nExpDate,nNation};
-                        Intent intent = new Intent(CameraActivity.this, MainActivity.class);
+                        Intent intent = new Intent(CameraActivity.this, NfcAcitivity.class);
                         intent.putExtra("result", arResult);
                         startActivity(intent);
                         finish();
@@ -521,7 +521,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     int d = Integer.parseInt(arrLine2[indexArr2].substring(startDOBD, startDOBD + 2));
                     String strDate = arrLine2[indexArr2].substring(startDOBY, startDOBD + 2);
                     if(!checkLastDigit(strDate,Integer.parseInt(arrLine2[indexArr2].charAt(startDOBD+2)+"")).isEmpty())
-                        nDOB = new SimpleDateFormat("yy/MM/dd").format(new Date(y, m - 1, d));
+                        nDOB = new SimpleDateFormat("yyMMdd").format(new Date(y, m - 1, d));
                 } catch (Exception e) {
 
                 }
@@ -534,7 +534,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     int d = Integer.parseInt(arrLine2[indexArr2].substring(startExpD, startExpD + 2));
                     String strDate = arrLine2[indexArr2].substring(startExpY, startExpD + 2);
                     if(!checkLastDigit(strDate,Integer.parseInt(arrLine2[indexArr2].charAt(startExpD+2)+"")).isEmpty())
-                        nExpDate = new SimpleDateFormat("yy/MM/dd").format(new Date(y, m - 1, d));
+                        nExpDate = new SimpleDateFormat("yyMMdd").format(new Date(y, m - 1, d));
 
                 } catch (Exception e) {
 

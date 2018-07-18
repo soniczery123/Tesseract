@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.test.epassportreadertesseract">
-
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -27,7 +26,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".NfcAcitivity"
+            android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,11 +35,11 @@
             </intent-filter>
         </activity>
 
-
+        <activity android:name=".ePassportInfoDisplay"></activity>
         <activity
             android:name=".CameraActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".NfcAcitivity">
         </activity>
         <activity android:name=".ListResult"></activity>
     </application>

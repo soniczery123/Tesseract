@@ -6,15 +6,19 @@ import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 public class NfcAcitivity extends AppCompatActivity {
     private NfcAdapter NFCadapter;
-
+    String[] result;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nfc_acitivity);
-        System.out.println("MAIN");
+        Intent intent = getIntent();
+        result = intent.getStringArrayExtra("result");
+
+        Log.e("RESULT:",result[5]+" "+result[7]);
     }
 
     @Override
@@ -38,13 +42,14 @@ public class NfcAcitivity extends AppCompatActivity {
         NFCadapter = NfcAdapter.getDefaultAdapter(this); // get default nfc adapter
 
         if (NFCadapter == null) {
-            // tratar erro
+            finish();
         } else if (!NFCadapter.isEnabled()) {
-            // tratar erro
+            finish();
         } else {
             //prepare the intent to the reader activity
-            Intent i = new Intent(NfcAcitivity.this, ePassportInfoDisplay.class);
+            Intent i = new Intent(this, ePassportInfoDisplay.class);
             i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            i.putExtra("result", result);
             PendingIntent pending = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
             String[][] techs = new String[][]{new String[]{"android.nfc.tech.IsoDep"}};
@@ -54,7 +59,8 @@ public class NfcAcitivity extends AppCompatActivity {
             // assportIfoDisplay priority over another
             //to manage this intent
 
-            NFCadapter.enableForegroundDispatch(NfcAcitivity.this, pending, null, techs);System.out.println("ENABLE");
+            NFCadapter.enableForegroundDispatch(this, pending, null, techs);
+            System.out.println("ENABLE");
         }
     }
 

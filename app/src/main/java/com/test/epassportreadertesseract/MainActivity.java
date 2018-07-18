@@ -5,8 +5,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -38,8 +42,10 @@ public class MainActivity extends AppCompatActivity {
     EditText ID, Firstname, Surname, Sex, DOB, PassType, ExpDate, Nation, CitizenNo;
     TextView ID_Con, Firstname_Con, Surname_Con, Sex_Con, DOB_Con, PassType_Con, ExpDate_Con, Nation_Con, CitizenNo_Con,titleDialog;
     Button buttonConfirm;
+    ImageView imgUser;
     final int RequestPermissionCode = 1;
     ProgressBar progressBar;
+    Bitmap bmp;
     RelativeLayout mainLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +73,17 @@ public class MainActivity extends AppCompatActivity {
         PassType = (EditText) findViewById(R.id.textViewPassportType);
         ExpDate = (EditText) findViewById(R.id.textViewExpDate);
         Nation = (EditText) findViewById(R.id.textViewNation);
+        imgUser = (ImageView)findViewById(R.id.imageUser);
 
         Intent intent = getIntent();
-        String[] result = intent.getStringArrayExtra("result");
-        if (result != null && result.length!=0) setText(result);
+        if(intent != null) {
+            String[] result = intent.getStringArrayExtra("result");
+            if (result != null && result.length != 0) {
+                byte[] byteArray = getIntent().getByteArrayExtra("bmp");
+                bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                setText(bmp, result);
+            }
+        }
 
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private void setText(String[] result) {
+    private void setText(Bitmap bmp,String [] result) {
         ID.setText(result[0]);
         CitizenNo.setText(result[1]);
         Firstname.setText(result[2]);
@@ -151,6 +164,8 @@ public class MainActivity extends AppCompatActivity {
         PassType.setText(result[6]);
         ExpDate.setText(result[7]);
         Nation.setText(result[8]);
+        imgUser.setBackground(new BitmapDrawable(getResources(), bmp));
+
     }
 
 
