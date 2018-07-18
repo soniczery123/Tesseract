@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
@@ -30,7 +31,6 @@ public class ePassportInfoDisplay extends Activity
         setContentView(R.layout.activity_e_passport_info_display);
         Intent intent = getIntent();
         result = intent.getStringArrayExtra("result");
-        views();
 
         startReading();
     }
@@ -67,9 +67,6 @@ public class ePassportInfoDisplay extends Activity
             public void readingPassportImageSucess(Bitmap passengerPhoto)
             {
                 bmp = passengerPhoto;
-
-
-
             }
 
             @Override
@@ -96,16 +93,12 @@ public class ePassportInfoDisplay extends Activity
             }
 
             @Override
-            public void readingPassportFail(String error) {}
-
+            public void readingPassportFail(String error) {
+                Toast.makeText(ePassportInfoDisplay.this, error.toString(), Toast.LENGTH_SHORT).show();
+            }
         });
 
         fachada.handleIntent(this.getIntent());
-    }
-
-    //ASSOCIA COMPONENTES A VARIAVEIS
-    private void views(){
-
     }
 
     private ArrayList<Credentials> getData(String [] result)

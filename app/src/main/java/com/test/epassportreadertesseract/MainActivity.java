@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -230,14 +229,6 @@ public class MainActivity extends AppCompatActivity {
             //  clearText();
             intent = new Intent(MainActivity.this, CameraActivity.class);
             startActivity(intent);
-        } else if (item.getItemId() == R.id.btn_nfc) {
-            NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-            if (nfcAdapter == null || !nfcAdapter.isEnabled()) {
-                Toast.makeText(this, "NFC Not Availiable!", Toast.LENGTH_SHORT).show();
-            } else {
-                intent = new Intent(MainActivity.this, NfcAcitivity.class);
-                startActivity(intent);
-            }
         }else{
             intent = new Intent(MainActivity.this, ListResult.class);
             startActivity(intent);

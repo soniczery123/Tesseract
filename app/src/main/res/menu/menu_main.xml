@@ -6,10 +6,6 @@
         android:icon="@mipmap/ic_launcher_camera"
         android:title="Camera"
         app:showAsAction="always"/>
-    <item android:id="@+id/btn_nfc"
-        android:icon="@mipmap/ic_launcher_nfc"
-        android:title="NFC"
-        app:showAsAction="always"/>
     <item
         android:id="@+id/btn_list"
         android:icon="@mipmap/ic_launcher_list"

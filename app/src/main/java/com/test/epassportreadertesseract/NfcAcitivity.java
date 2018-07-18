@@ -7,6 +7,7 @@ import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 public class NfcAcitivity extends AppCompatActivity {
     private NfcAdapter NFCadapter;
@@ -41,11 +42,9 @@ public class NfcAcitivity extends AppCompatActivity {
         Context context = this.getApplicationContext();
         NFCadapter = NfcAdapter.getDefaultAdapter(this); // get default nfc adapter
 
-        if (NFCadapter == null) {
-            finish();
-        } else if (!NFCadapter.isEnabled()) {
-            finish();
-        } else {
+        if (NFCadapter == null || !NFCadapter.isEnabled()) {
+            Toast.makeText(context, "Please Turn on NFC", Toast.LENGTH_SHORT).show();
+        }  else {
             //prepare the intent to the reader activity
             Intent i = new Intent(this, ePassportInfoDisplay.class);
             i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
