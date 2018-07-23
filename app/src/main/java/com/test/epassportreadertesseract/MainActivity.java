@@ -211,8 +211,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        finishAffinity();
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Do you want to exit?");
+        dialog.setMessage("Exit?");
+        dialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                finishAffinity();
+            }
+        });
+        dialog.setNegativeButton("CANCEL", null);
+        dialog.create().show();
 
     }
 
@@ -226,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent = null;
         if (item.getItemId() == R.id.btn_camera) {
-            //  clearText();
             intent = new Intent(MainActivity.this, CameraActivity.class);
             startActivity(intent);
         }else{

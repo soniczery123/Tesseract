@@ -383,8 +383,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             extractString(result);
             System.out.println(result);
 
-             if (nCitizenNo.isEmpty() || nDOB.isEmpty() || nExpDate.isEmpty() || nFirstname.isEmpty() || nID.isEmpty()
-                     || nSurname.isEmpty() || nPassType.isEmpty() || nNation.isEmpty() || nSex.isEmpty()) {
+             if (nCitizenNo.isEmpty() || nDOB.isEmpty() || nExpDate.isEmpty() || nPassType.isEmpty()) {
                 Toast.makeText(this, "Please try again ", Toast.LENGTH_SHORT).show();
 
             } else {
@@ -404,7 +403,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
                     public void onFinish() {
                         // Finish
-                        String[] arResult  = new String[]{nID,nCitizenNo,nFirstname,nSurname,nSex,nDOB,nPassType,nExpDate,nNation};
+                        String[] arResult  = new String[]{nID,nCitizenNo,nDOB,nPassType,nExpDate};
                         Intent intent = new Intent(CameraActivity.this, NfcAcitivity.class);
                         intent.putExtra("result", arResult);
                         startActivity(intent);
@@ -449,48 +448,34 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         checkAll = line2.substring(0,10)+line2.substring(13,20)+ line2.substring(21,43);
         try {
             if(!checkLastDigit(checkAll,Integer.parseInt(line2.charAt(line2.length()-1)+"")).isEmpty()){
-                line1 = line1.replace(" ", "");
+
                 line2 = line2.replace(" ", "");
-                String arrLine1[] = line1.split("<");
                 String arrLine2[] = line2.split("<");
                 //  Log.i("1",line1);
                 // Log.i("1", line2);
                 String removeEmp1 = "";
                 String removeEmp2 = "";
-                for (int i = 0; i < arrLine1.length; i++) {
-                    if (!arrLine1[i].isEmpty()) {
-                        removeEmp1 += arrLine1[i] + ",";
-                        //  Log.i("1",removeEmp1);
-                    }
-                }
                 for (int i = 0; i < arrLine2.length; i++) {
                     if (!arrLine2[i].isEmpty()) {
                         removeEmp2 += arrLine2[i] + ",";
                         // Log.i("1", removeEmp2);
                     }
                 }
-                arrLine1 = removeEmp1.split(",");
                 arrLine2 = removeEmp2.split(",");
                 //  Log.i("1",arrLine1.length+"");
                 //  Log.i("1",arrLine2.length+"");
-                nPassType = arrLine1[0];
-                nSurname = checkAlphabet(arrLine1[1].substring(3, arrLine1[1].length()).trim());
-                nFirstname = "";
-                for (int i = 2; i < arrLine1.length; i++) {
-                    nFirstname += arrLine1[i] + " ";
-                }
-                nFirstname = nFirstname.trim();
 
+                if(line1.charAt(0)== 'P' || line1.charAt(0) == 'O' || line1.charAt(0) == 'D'){
+                    nPassType = line1.charAt(0)+"";
+                }
 
                 int indexArr1 = 0;
                 int indexArr2 = 0;
                 int startID = 0;
                 int stopID = 9;
-                int startNation = 10;
                 int startDOBY = 13;
                 int startDOBM = 15;
                 int startDOBD = 17;
-                int startSex = 20;
                 int startExpY = 21;
                 int startExpM = 23;
                 int startExpD = 25;
@@ -501,11 +486,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     indexArr2 = 1;
                     startID = 0;
                     stopID = arrLine2[0].length();
-                    startNation = 1;
                     startDOBY = 4;
                     startDOBM = 6;
                     startDOBD = 8;
-                    startSex = 11;
                     startExpY = 12;
                     startExpM = 14;
                     startExpD = 16;
@@ -513,7 +496,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 }
 
                 nID = checkLastDigit(arrLine2[indexArr1].substring(startID, stopID),Integer.parseInt(arrLine2[indexArr1].charAt(stopID)+""));
-                nNation = checkAlphabet(arrLine2[indexArr2].substring(startNation, startNation + 3));
 
                 try {
                     int y = Integer.parseInt(arrLine2[indexArr2].substring(startDOBY, startDOBY + 2));
@@ -526,7 +508,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
                 }
 
-                nSex = checkAlphabet(arrLine2[indexArr2].substring(startSex, startSex + 1));
 
                 try {
                     int y = Integer.parseInt(arrLine2[indexArr2].substring(startExpY, startExpY + 2));
@@ -550,13 +531,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     }
 
-    String checkAlphabet(String str) {
-        if (str.contains("1") || str.contains("2") || str.contains("3") || str.contains("4") || str.contains("5") ||
-                str.contains("6") || str.contains("7") || str.contains("8") || str.contains("9") || str.contains("0")) {
-            return "";
-        }
-        return str;
-    }
 
     private String checkLastDigit(String str,int lastDigit){
         int count = 7 ;

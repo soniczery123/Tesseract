@@ -42,23 +42,22 @@ public class ePassportInfoDisplay extends Activity
             @Override
             public void readingPassportDataSucess(Passenger passenger)
             {
-
-                result[0] = passenger.getPassportNumber();
-                result[1] = passenger.getDocumentID();
-                result[2] = passenger.getName();
-                result[3] = passenger.getSurname();
-                result[4] = passenger.getGender();
+                String DOB = "";
+                String EXP = "";
                 DateFormat df =  new SimpleDateFormat("yyMMdd");
                 DateFormat df2 =  new SimpleDateFormat("yy/MM/dd");
                 try {
-                    Date dateDOB = df.parse(result[5]);
-                    Date dateEXP = df.parse(result[7]);
-                    result[5] = df2.format(dateDOB);
-                    result[7] = df2.format(dateEXP);
+                    Date dateDOB = df.parse(result[2]);
+                    Date dateEXP = df.parse(result[4]);
+                    DOB = df2.format(dateDOB);
+                    EXP = df2.format(dateEXP);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                result[8] = passenger.getNationality();
+                result = new String[]{passenger.getPassportNumber(),passenger.getDocumentID()
+                ,passenger.getName(),passenger.getSurname(),passenger.getGender()
+                ,DOB,result[3],EXP,passenger.getNationality()};
+
 
 
             }
@@ -108,7 +107,7 @@ public class ePassportInfoDisplay extends Activity
         try
         {
 
-            Credentials credentialGabriel = new Credentials(result[0],result[5], result[7]);
+            Credentials credentialGabriel = new Credentials(result[0],result[2], result[4]);
 
             allCredentials.add(credentialGabriel);
 

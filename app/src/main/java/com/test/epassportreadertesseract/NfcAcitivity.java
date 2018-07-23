@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 public class NfcAcitivity extends AppCompatActivity {
@@ -16,39 +16,38 @@ public class NfcAcitivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nfc_acitivity);
+        Context context = this.getApplicationContext();
+        NFCadapter = NfcAdapter.getDefaultAdapter(this); // get default nfc adapter
+
+        if (NFCadapter == null || !NFCadapter.isEnabled()) {
+            Toast.makeText(context, "Please Turn on the NFC", Toast.LENGTH_SHORT).show();
+            startActivity(
+                    new Intent(Settings.ACTION_NFC_SETTINGS));
+        }
         Intent intent = getIntent();
         result = intent.getStringArrayExtra("result");
 
-        Log.e("RESULT:",result[5]+" "+result[7]);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         enableForegroundDispatch();
-        System.out.println("RESUME");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         disableForegroundDispatch();
-        System.out.println("ONPAUSE");
     }
 
     public void enableForegroundDispatch() {
 
-        Context context = this.getApplicationContext();
-        NFCadapter = NfcAdapter.getDefaultAdapter(this); // get default nfc adapter
-
-        if (NFCadapter == null || !NFCadapter.isEnabled()) {
-            Toast.makeText(context, "Please Turn on NFC", Toast.LENGTH_SHORT).show();
-        }  else {
             //prepare the intent to the reader activity
             Intent i = new Intent(this, ePassportInfoDisplay.class);
             i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             i.putExtra("result", result);
+
             PendingIntent pending = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
             String[][] techs = new String[][]{new String[]{"android.nfc.tech.IsoDep"}};
@@ -59,8 +58,7 @@ public class NfcAcitivity extends AppCompatActivity {
             //to manage this intent
 
             NFCadapter.enableForegroundDispatch(this, pending, null, techs);
-            System.out.println("ENABLE");
-        }
+
     }
 
     public void disableForegroundDispatch() {
